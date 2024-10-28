@@ -17,7 +17,7 @@ This module provides the following features:
 
 ```hcl
 module "sysprom" {
-  source           = "git::https://github.com/lidofinance/tf-module-openstack-vm.git?ref=v0.0.1"
+  source           = "git::git@github.com:lidofinance/tf-module-openstack-vm.git?ref=0.0.1"
   name             = "instance-name"
   env              = terraform.workspace
   machine_type     = "a4-ram8-disk50-perf1"
