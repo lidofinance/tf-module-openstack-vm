@@ -2,6 +2,19 @@
 
 This Terraform module deploys a virtual machine (VM) on OpenStack, complete with networking and optional storage configurations. The module includes resources for the VM instance, a port, floating IP, and an extra disk, if specified.
 
+## Features
+
+This module provides the following features:
+
+- **Compute Instance**: Creates an OpenStack VM with a specified machine type, boot disk configuration, and optional SSH key.
+- **Networking**: Attaches a network port with specified security groups to the VM. If configured, it also allocates and associates a floating IP from an external network pool, allowing external access to the VM.
+- **Additional Storage**: Adds an optional extra disk to the VM with customizable size, type, and optional snapshot ID.
+- **Flexible Metadata**: Supports custom metadata labels.
+- **Backup Option for Extra Disk**: Enables optional backup for the additional disk.
+- **Lifecycle Management**: Supports boot disk auto-deletion upon VM termination and preserves VM state when redeploying with minimal changes.
+
+## Usage
+
 ```hcl
 module "sysprom" {
   source           = "git::https://github.com/lidofinance/tf-module-openstack-vm.git?ref=v0.0.1"
@@ -14,7 +27,7 @@ module "sysprom" {
   subnet_id        = "subnet_id"
   external_ip      = true
   security_groups  = ["secgroup-main", "secgroup-prometheus"]
-  labels           ={
+  labels           = {
     team = "devops",
     env = "mainnet"
   }
