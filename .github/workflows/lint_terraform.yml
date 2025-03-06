@@ -1,0 +1,42 @@
+---
+name: Lint playbooks
+
+on:
+  workflow_dispatch:
+  push:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  terraform-lint:
+    name: Lint Terraform Code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+          terraform_version: 1.10.3
+
+      - name: Validate Terraform Formatting
+        run: terraform fmt -check -recursive
+
+      - name: Install TFLint
+        run: |
+          # Download latest TFLint release
+          TFLINT_VERSION=$(curl -s https://api.github.com/repos/terraform-linters/tflint/releases/latest | jq -r '.tag_name' | sed 's/v//')
+          curl -L -o tflint.zip https://github.com/terraform-linters/tflint/releases/download/v${TFLINT_VERSION}/tflint_linux_amd64.zip
+
+          # Unzip and move the binary
+          unzip tflint.zip
+          chmod +x tflint
+          sudo mv tflint /usr/local/bin/
+
+      - name: Run TFLint
+        run: tflint --recursive
