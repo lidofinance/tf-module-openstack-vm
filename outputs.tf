@@ -3,7 +3,7 @@ output "vm_ext_ip" {
 }
 
 output "vm_int_ip" {
-  value = openstack_compute_instance_v2.vm.network.0.fixed_ip_v4
+  value = openstack_compute_instance_v2.vm.network[0].fixed_ip_v4
 }
 
 output "vm_name" {

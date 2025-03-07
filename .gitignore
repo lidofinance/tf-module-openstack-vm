@@ -4,6 +4,7 @@
 # .tfstate files
 *.tfstate
 *.tfstate.*
+.terraform.lock.hcl
 
 # Crash log files
 crash.log
@@ -27,6 +28,7 @@ override.tf.json
 terraform.rc
 
 # Exclude all .secret, .secrets files
+secrets/**
 *.secrets
 *.secret
 
