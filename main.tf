@@ -46,17 +46,6 @@ resource "openstack_compute_instance_v2" "vm" {
     delete_on_termination = var.boot_disk_auto_delete
   }
 
-  dynamic "block_device" {
-    for_each = var.extra_disk_size == 0 ? [] : [1]
-    content {
-      uuid                  = openstack_blockstorage_volume_v3.ext_disk[0].id
-      source_type           = "volume"
-      destination_type      = "volume"
-      boot_index            = -1
-      delete_on_termination = false
-    }
-  }
-
   metadata = { for key, value in merge(var.labels, { description = var.description }) : key => value }
 
   depends_on = [
@@ -69,4 +58,11 @@ resource "openstack_compute_instance_v2" "vm" {
       block_device[0].uuid,
     ]
   }
+}
+
+resource "openstack_compute_volume_attach_v2" "attached" {
+  count       = var.extra_disk_size == 0 ? 0 : 1
+  instance_id = openstack_compute_instance_v2.vm.id
+  volume_id   = openstack_blockstorage_volume_v3.ext_disk[0].id
+  depends_on  = [openstack_compute_instance_v2.vm, openstack_blockstorage_volume_v3.ext_disk[0]]
 }
