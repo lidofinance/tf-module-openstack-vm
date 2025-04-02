@@ -2,8 +2,8 @@ name: Create Release
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
 
 permissions:
   contents: write
@@ -12,29 +12,9 @@ permissions:
 jobs:
   build:
     name: Create Release
+    if: github.event.base_ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Extract GitHub Tag
-        id: extract_tag
-        run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-
-      - name: Validate SemVer Format
-        run: |
-          echo $GITHUB_ENV
-          SEMVER_REGEX="[0-9]+\.[0-9]+\.[0-9]+$"
-
-          if [ -z "$TAG" ]; then
-            echo "❌ TAG is not set."
-            exit 1
-          fi
-
-          if [[ ! $TAG =~ $SEMVER_REGEX ]]; then
-            echo "❌ Tag '$TAG' is not a valid SemVer format (X.Y.Z)."
-            exit 1
-          fi
-
-          echo "✅ Tag '$TAG' is valid!"
-
       - name: Checkout code
         uses: actions/checkout@v4
 
