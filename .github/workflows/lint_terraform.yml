@@ -1,5 +1,5 @@
 ---
-name: Lint playbooks
+name: Lint terraform
 
 on:
   workflow_dispatch:
