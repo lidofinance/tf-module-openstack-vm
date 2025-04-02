@@ -60,6 +60,7 @@ module "sysprom" {
 | labels                | Additional metadata labels for the VM and extra disk.            | map    | {}      | no       |
 | backup_enable         | Whether to enable backups for the extra disk.                    | bool   | "false" | no       |
 | external_ip           | Whether to allocate and associate a floating IP to the VM.       | bool   | "false" | no       |
+| user_data             | User data (cloud-init) script to provide when launching the VM.  | string | null    | no       |
 
 ## Outputs
 
