@@ -1,12 +1,9 @@
 name: Create Release
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
-    tags:
-      - "*"
 
 permissions:
   contents: write
@@ -25,6 +22,11 @@ jobs:
         run: |
           echo $GITHUB_ENV
           SEMVER_REGEX="[0-9]+\.[0-9]+\.[0-9]+$"
+
+          if [ -z "$TAG" ]; then
+            echo "❌ TAG is not set."
+            exit 1
+          fi
 
           if [[ ! $TAG =~ $SEMVER_REGEX ]]; then
             echo "❌ Tag '$TAG' is not a valid SemVer format (X.Y.Z)."
