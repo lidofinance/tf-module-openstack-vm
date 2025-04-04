@@ -72,4 +72,8 @@ variable "backup_enable" {
   type    = bool
   default = false
 }
-
+variable "user_data" {
+  description = "User data script to pass to the instance."
+  type        = string
+  default     = null
+}
