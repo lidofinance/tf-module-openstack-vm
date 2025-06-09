@@ -45,6 +45,11 @@ variable "extra_disk_snapshot" {
   type    = string
   default = ""
 }
+variable "extra_disk_enable_online_resize" {
+  description = "When this option is set it allows extending attached volumes"
+  type        = bool
+  default     = true
+}
 variable "boot_disk_auto_delete" {
   type    = bool
   default = true
