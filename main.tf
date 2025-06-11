@@ -21,12 +21,13 @@ resource "openstack_networking_floatingip_associate_v2" "fip_association" {
 }
 
 resource "openstack_blockstorage_volume_v3" "ext_disk" {
-  count       = var.extra_disk_size == 0 ? 0 : 1
-  name        = var.extra_disk_name == "" ? "${var.name}-extra" : var.extra_disk_name
-  size        = var.extra_disk_size
-  volume_type = var.extra_disk_type
-  snapshot_id = var.extra_disk_snapshot == "" ? null : var.extra_disk_snapshot
-  metadata    = { for key, value in merge(var.labels, { description = var.description }, { backup = var.backup_enable }) : key => value }
+  count                = var.extra_disk_size == 0 ? 0 : 1
+  name                 = var.extra_disk_name == "" ? "${var.name}-extra" : var.extra_disk_name
+  size                 = var.extra_disk_size
+  volume_type          = var.extra_disk_type
+  snapshot_id          = var.extra_disk_snapshot == "" ? null : var.extra_disk_snapshot
+  metadata             = { for key, value in merge(var.labels, { description = var.description }, { backup = var.backup_enable }) : key => value }
+  enable_online_resize = var.extra_disk_enable_online_resize
 }
 
 resource "openstack_compute_instance_v2" "vm" {
