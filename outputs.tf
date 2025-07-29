@@ -21,7 +21,7 @@ output "team" {
 output "additional_disks" {
   description = "Information about the additional disks created and attached to the VM"
   value = {
-    volumes = openstack_blockstorage_volume_v3.additional_disks
+    volumes     = openstack_blockstorage_volume_v3.additional_disks
     attachments = openstack_compute_volume_attach_v2.additional_disks_attached
   }
 }

@@ -34,7 +34,7 @@ resource "openstack_blockstorage_volume_v3" "ext_disk" {
 # Multiple additional disks support
 resource "openstack_blockstorage_volume_v3" "additional_disks" {
   for_each = { for idx, disk in var.additional_disks : idx => disk }
-  
+
   name                 = "${var.name}-${each.value.name}"
   size                 = each.value.size
   volume_type          = each.value.volume_type
@@ -88,7 +88,7 @@ resource "openstack_compute_volume_attach_v2" "attached" {
 # Multiple additional disks attachment
 resource "openstack_compute_volume_attach_v2" "additional_disks_attached" {
   for_each = openstack_blockstorage_volume_v3.additional_disks
-  
+
   instance_id = openstack_compute_instance_v2.vm.id
   volume_id   = each.value.id
   depends_on  = [openstack_compute_instance_v2.vm, each.value]

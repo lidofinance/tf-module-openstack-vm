@@ -86,12 +86,12 @@ variable "user_data" {
 variable "additional_disks" {
   description = "List of additional disks to attach to the VM"
   type = list(object({
-    name                    = string
-    size                    = number
-    volume_type            = optional(string, "CEPH_1_perf2")
-    snapshot_id            = optional(string, "")
-    enable_online_resize   = optional(bool, true)
-    auto_delete            = optional(bool, false)
+    name                 = string
+    size                 = number
+    volume_type          = optional(string, "CEPH_1_perf2")
+    snapshot_id          = optional(string, "")
+    enable_online_resize = optional(bool, true)
+    auto_delete          = optional(bool, false)
   }))
   default = []
   validation {
