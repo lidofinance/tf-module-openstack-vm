@@ -20,6 +20,7 @@ resource "openstack_networking_floatingip_associate_v2" "fip_association" {
   port_id     = openstack_networking_port_v2.vm_port.id
 }
 
+# Legacy single extra disk support (for backward compatibility)
 resource "openstack_blockstorage_volume_v3" "ext_disk" {
   count                = var.extra_disk_size == 0 ? 0 : 1
   name                 = var.extra_disk_name == "" ? "${var.name}-extra" : var.extra_disk_name
@@ -28,6 +29,18 @@ resource "openstack_blockstorage_volume_v3" "ext_disk" {
   snapshot_id          = var.extra_disk_snapshot == "" ? null : var.extra_disk_snapshot
   metadata             = { for key, value in merge(var.labels, { description = var.description }, { backup = var.backup_enable }) : key => value }
   enable_online_resize = var.extra_disk_enable_online_resize
+}
+
+# Multiple additional disks support
+resource "openstack_blockstorage_volume_v3" "additional_disks" {
+  for_each = { for idx, disk in var.additional_disks : idx => disk }
+
+  name                 = "${var.name}-${each.value.name}"
+  size                 = each.value.size
+  volume_type          = each.value.volume_type
+  snapshot_id          = each.value.snapshot_id == "" ? null : each.value.snapshot_id
+  metadata             = { for key, value in merge(var.labels, { description = var.description }, { backup = var.backup_enable }) : key => value }
+  enable_online_resize = each.value.enable_online_resize
 }
 
 resource "openstack_compute_instance_v2" "vm" {
@@ -52,7 +65,8 @@ resource "openstack_compute_instance_v2" "vm" {
   depends_on = [
     openstack_networking_floatingip_v2.ext_ip,
     openstack_networking_port_v2.vm_port,
-    openstack_blockstorage_volume_v3.ext_disk
+    openstack_blockstorage_volume_v3.ext_disk,
+    openstack_blockstorage_volume_v3.additional_disks
   ]
   lifecycle {
     ignore_changes = [
@@ -63,9 +77,19 @@ resource "openstack_compute_instance_v2" "vm" {
   user_data = var.user_data
 }
 
+# Legacy single extra disk attachment (for backward compatibility)
 resource "openstack_compute_volume_attach_v2" "attached" {
   count       = var.extra_disk_size == 0 ? 0 : 1
   instance_id = openstack_compute_instance_v2.vm.id
   volume_id   = openstack_blockstorage_volume_v3.ext_disk[0].id
   depends_on  = [openstack_compute_instance_v2.vm, openstack_blockstorage_volume_v3.ext_disk[0]]
+}
+
+# Multiple additional disks attachment
+resource "openstack_compute_volume_attach_v2" "additional_disks_attached" {
+  for_each = openstack_blockstorage_volume_v3.additional_disks
+
+  instance_id = openstack_compute_instance_v2.vm.id
+  volume_id   = each.value.id
+  depends_on  = [openstack_compute_instance_v2.vm, each.value]
 }

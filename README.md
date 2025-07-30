@@ -1,6 +1,6 @@
 # OpenStack VM Module
 
-This Terraform module deploys a virtual machine (VM) on OpenStack, complete with networking and optional storage configurations. The module includes resources for the VM instance, a port, floating IP, and an extra disk, if specified.
+This Terraform module deploys a virtual machine (VM) on OpenStack, complete with networking and optional storage configurations. The module includes resources for the VM instance, a port, floating IP, and multiple additional disks, if specified.
 
 ## Features
 
@@ -8,10 +8,12 @@ This module provides the following features:
 
 - **Compute Instance**: Creates an OpenStack VM with a specified machine type, boot disk configuration, and optional SSH key.
 - **Networking**: Attaches a network port with specified security groups to the VM. If configured, it also allocates and associates a floating IP from an external network pool, allowing external access to the VM.
-- **Additional Storage**: Adds an optional extra disk to the VM with customizable size, type, and optional snapshot ID.
+- **Additional Storage**: Supports both legacy single extra disk and new multiple additional disks with customizable size, type, and optional snapshot ID.
 - **Flexible Metadata**: Supports custom metadata labels.
-- **Backup Option for Extra Disk**: Enables optional backup for the additional disk.
+- **Backup Option for Extra Disk**: Enables optional backup for the additional disks.
 - **Lifecycle Management**: Supports boot disk auto-deletion upon VM termination and preserves VM state when redeploying with minimal changes.
+
+> **Note**: The module maintains backward compatibility with the legacy `extra_disk_*` variables while providing enhanced functionality through the new `additional_disks` variable. You can use either approach or both together.
 
 ## Usage
 
@@ -35,6 +37,49 @@ module "sysprom" {
   ssh_key_pair     = "ssh_key_pair_name"
 }
 
+### Example with Multiple Additional Disks
+
+```hcl
+module "worker_node1" {
+  source           = "git::git@github.com:lidofinance/tf-module-openstack-vm.git?ref=0.0.1"
+  name             = "db-server"
+  env              = terraform.workspace
+  machine_type     = "a4-ram8-disk50-perf1"
+  description      = "some description"
+  image_id         = "image_id"
+  network_id       = "network_id"
+  subnet_id        = "subnet_id"
+  external_ip      = true
+  security_groups  = ["secgroup-main", "secgroup-prometheus"]
+  labels           = {
+    team = "devops",
+    env = "mainnet"
+  }
+  floating_ip_pool = "ext-floating1"
+  ssh_key_pair     = "ssh_key_pair_name"
+  
+  # Multiple additional disks
+  additional_disks = [
+    {
+      name                  = "data"
+      size                  = 100
+      enable_online_resize = true
+      auto_delete          = false
+    },
+    {
+      name                  = "backup"
+      size                  = 200
+      enable_online_resize = true
+      auto_delete          = false
+    },
+    {
+      name                  = "logs"
+      size                  = 50
+      enable_online_resize = true
+      auto_delete          = true
+    }
+  ]
+}
 ```
 
 ## Inputs
@@ -61,11 +106,16 @@ module "sysprom" {
 | backup_enable         | Whether to enable backups for the extra disk.                    | bool   | "false" | no       |
 | external_ip           | Whether to allocate and associate a floating IP to the VM.       | bool   | "false" | no       |
 | user_data             | User data (cloud-init) script to provide when launching the VM.  | string | null    | no       |
+| additional_disks      | List of additional disks to attach to the VM. Each disk object contains: name (string), size (number), volume_type (optional string, default "CEPH_1_perf2"), snapshot_id (optional string), enable_online_resize (optional bool, default true), auto_delete (optional bool, default false) | list(object) | [] | no |
 
 ## Outputs
 
 | Name   | Description                     |
 | ------ | ------------------------------- |
-| vm_id  | ID of the created VM instance.  |
-| vm_ip  | Internal IP address of the VM.  |
-| ext_ip | Floating IP assigned to the VM. |
+| vm_ext_ip | External IP address of the VM (if external_ip is true). |
+| vm_int_ip | Internal IP address of the VM. |
+| vm_name | Name of the created VM instance. |
+| labels | Metadata labels applied to the VM. |
+| team | Team label from the VM metadata. |
+| additional_disks | Information about the additional disks created and attached to the VM. |
+| all_disk_volumes | All disk volumes (legacy extra disk + additional disks). |

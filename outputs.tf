@@ -17,3 +17,19 @@ output "labels" {
 output "team" {
   value = openstack_compute_instance_v2.vm.metadata["team"]
 }
+
+output "additional_disks" {
+  description = "Information about the additional disks created and attached to the VM"
+  value = {
+    volumes     = openstack_blockstorage_volume_v3.additional_disks
+    attachments = openstack_compute_volume_attach_v2.additional_disks_attached
+  }
+}
+
+output "all_disk_volumes" {
+  description = "All disk volumes (legacy extra disk + additional disks)"
+  value = {
+    legacy_extra_disk = var.extra_disk_size > 0 ? openstack_blockstorage_volume_v3.ext_disk[0] : null
+    additional_disks  = openstack_blockstorage_volume_v3.additional_disks
+  }
+}

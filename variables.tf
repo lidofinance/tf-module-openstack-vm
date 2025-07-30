@@ -82,3 +82,22 @@ variable "user_data" {
   type        = string
   default     = null
 }
+
+variable "additional_disks" {
+  description = "List of additional disks to attach to the VM"
+  type = list(object({
+    name                 = string
+    size                 = number
+    volume_type          = optional(string, "CEPH_1_perf2")
+    snapshot_id          = optional(string, "")
+    enable_online_resize = optional(bool, true)
+    auto_delete          = optional(bool, false)
+  }))
+  default = []
+  validation {
+    condition = alltrue([
+      for disk in var.additional_disks : disk.size > 0
+    ])
+    error_message = "All disk sizes must be greater than 0."
+  }
+}
