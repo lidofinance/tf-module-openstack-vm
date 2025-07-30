@@ -91,5 +91,5 @@ resource "openstack_compute_volume_attach_v2" "additional_disks_attached" {
 
   instance_id = openstack_compute_instance_v2.vm.id
   volume_id   = each.value.id
-  depends_on  = [openstack_compute_instance_v2.vm, each.value]
+  depends_on  = [openstack_compute_instance_v2.vm]
 }
